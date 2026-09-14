@@ -109,11 +109,20 @@ func (v *VaultClient) request(method string, url string, requestBody interface{}
 	}()
 
 	if res.StatusCode < 200 || res.StatusCode >= 300 {
-		if res.StatusCode == 401 {
+		if res.StatusCode == http.StatusUnauthorized {
 			log.Println("Vault token is not authorized for this action")
-			return errors.New(fmt.Sprintf("vault token is not authorized for this action"))
+			return errors.New("vault token is not authorized for this action")
 		}
-		log.Printf("An error was returned: %v, %v\n", res.StatusCode, res.Body)
+		body, readErr := io.ReadAll(res.Body)
+		if readErr != nil {
+			log.Printf("An error was returned: %v, and its body could not be read: %v\n", res.StatusCode, readErr)
+			return fmt.Errorf("previder vault returned %s", res.Status)
+		}
+		log.Printf("An error was returned: %v, %s\n", res.StatusCode, body)
+		if len(bytes.TrimSpace(body)) == 0 {
+			return fmt.Errorf("previder vault returned %s", res.Status)
+		}
+		return fmt.Errorf("previder vault returned %s: %s", res.Status, bytes.TrimSpace(body))
 	}
 
 	if responseBody != nil {
