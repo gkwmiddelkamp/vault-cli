@@ -43,7 +43,10 @@ func init() {
 
 	cmdCreate.Flags().StringP("description", "d", "", "Description of the token")
 	cmdCreate.Flags().StringP("expires", "e", "", "Expire date of the token, date in following formats are allowed [2006-01-02 /  2006-01-02 15:04:05 / 2006-01-02T15:04:05 ]")
-	cmdCreate.Flags().StringP("type", "r", "ReadWrite", "Type of token [ReadOnly / ReadWrite / EnvironmentAdmin / MasterAdmin]")
+	cmdCreate.Flags().StringP("type", "r", model.TokenTypeReadWrite,
+		fmt.Sprintf("Type of token [%s / %s / %s / %s]",
+			model.TokenTypeReadOnly, model.TokenTypeReadWrite,
+			model.TokenTypeEnvironmentAdmin, model.TokenTypeMasterAdmin))
 
 	var cmdDelete = &cobra.Command{
 		Use:        "delete [id]",
